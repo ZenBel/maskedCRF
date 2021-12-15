@@ -38,8 +38,10 @@ class CRF(nn.Module):
         self.end_transitions = nn.Parameter(torch.empty(num_tags))
         self.transitions = nn.Parameter(torch.empty(num_tags, num_tags))
         self.reset_parameters()
-        self.mask_tran_matrix = torch.tensor(self.get_mask_trans())
-        self.transitions.data = self.transitions.min(self.mask_tran_matrix)
+
+        if self.label2idx_map is not None:
+            self.mask_tran_matrix = torch.tensor(self.get_mask_trans())
+            self.transitions.data = self.transitions.min(self.mask_tran_matrix)
 
     def reset_parameters(self) -> None:
         """Initialize the transition parameters.
@@ -175,6 +177,10 @@ class CRF(nn.Module):
         score = self.start_transitions[tags[0]]
         score += emissions[0, torch.arange(batch_size), tags[0]]
 
+        # Use masked CRF
+        if self.label2idx_map is not None:
+            self.transitions.data = self.transitions.min(self.mask_tran_matrix)
+
         for i in range(1, seq_length):
             # Transition score to next tag, only added if next timestep is valid (mask == 1)
             # shape: (batch_size,)
@@ -210,6 +216,10 @@ class CRF(nn.Module):
         # the score that the first timestep has tag j
         # shape: (batch_size, num_tags)
         score = self.start_transitions + emissions[0]
+
+        # Use masked CRF
+        if self.label2idx_map is not None:
+            self.transitions.data = self.transitions.min(self.mask_tran_matrix)
 
         for i in range(1, seq_length):
             # Broadcast score for every possible next tag
@@ -260,6 +270,10 @@ class CRF(nn.Module):
         # shape: (batch_size, num_tags)
         score = self.start_transitions + emissions[0]
         history = []
+
+        # Use masked CRF
+        if self.label2idx_map is not None:
+            self.transitions.data = self.transitions.min(self.mask_tran_matrix)
 
         # score is a tensor of size (batch_size, num_tags) where for every batch,
         # value at column j stores the score of the best tag sequence so far that ends
