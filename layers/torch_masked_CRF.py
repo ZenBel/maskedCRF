@@ -40,7 +40,6 @@ class CRF(nn.Module):
 
         if self.label2idx_map is not None:
             self.mask_tran_matrix = torch.tensor(self.get_mask_trans())
-            self.transitions.data = self.transitions.min(self.mask_tran_matrix)
 
     def reset_parameters(self) -> None:
         """Initialize the transition parameters.
