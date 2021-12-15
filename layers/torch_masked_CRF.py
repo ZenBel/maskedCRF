@@ -5,14 +5,15 @@ torch.set_printoptions(profile="full")
 import torch.nn as nn
 
 class CRF(nn.Module):
-    """Conditional random field.
-    This module implements a conditional random field [LMP01]_. The forward computation
+    """Masked conditional random field.
+    This module implements a masked conditional random field [WEI21]. The forward computation
     of this class computes the log likelihood of the given sequence of tags and
     emission score tensor. This class also has `~CRF.decode` method which finds
     the best tag sequence given an emission score tensor using `Viterbi algorithm`_.
     Args:
         num_tags: Number of tags.
         batch_first: Whether the first dimension corresponds to the size of a minibatch.
+        label2idx: a dictionary mapping labels to indices.
     Attributes:
         start_transitions (`~torch.nn.Parameter`): Start transition score tensor of size
             ``(num_tags,)``.
@@ -20,10 +21,8 @@ class CRF(nn.Module):
             ``(num_tags,)``.
         transitions (`~torch.nn.Parameter`): Transition score tensor of size
             ``(num_tags, num_tags)``.
-    .. [LMP01] Lafferty, J., McCallum, A., Pereira, F. (2001).
-       "Conditional random fields: Probabilistic models for segmenting and
-       labeling sequence data". *Proc. 18th International Conf. on Machine
-       Learning*. Morgan Kaufmann. pp. 282–289.
+    .. [[WEI21] Wei, Tianwen, et al. "Masked Conditional Random Fields for Sequence Labeling."
+        arXiv preprint arXiv:2103.10682 (2021).
     .. _Viterbi algorithm: https://en.wikipedia.org/wiki/Viterbi_algorithm
     """
 
